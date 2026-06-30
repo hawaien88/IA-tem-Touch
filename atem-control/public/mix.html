@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mix</title>
+  <meta name="viewport" content="width=1280, height=800, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+    }
+	
+	body {
+	  background-image: url("/images/background_global_iatem.png");
+	}
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: #1a1a1a;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+      z-index: 1000;
+    }
+
+    .back-button {
+      background: #444;
+      border: none;
+      padding: 10px 16px;
+      color: white;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #555;
+    }
+
+    .transition-buttons {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .transition-button {
+      background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: white;
+      text-align: center;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.05),
+        0 4px 8px rgba(0,0,0,0.8);
+      font-size: 16px;
+      transition: transform 0.1s;
+      cursor: pointer;
+      border: none;
+      min-width: 70px;
+    }
+
+    .transition-button:active {
+      background: linear-gradient(to bottom, #1a1a1a, #2e2e2e);
+      transform: scale(0.97);
+    }
+
+    .me-select-container {
+      background: #222;
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.05),
+        0 4px 8px rgba(0,0,0,0.8);
+      font-size: 16px;
+      user-select: none;
+    }
+    .me-select-container label {
+      margin-right: 8px;
+    }
+    .me-select-container select {
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      height: 100%;
+      box-sizing: border-box;
+      padding: 120px 20px 20px;
+    }
+
+    .transition-time {
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 36px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+      margin: 40px 0 30px;
+      min-width: 160px;
+      text-align: center;
+    }
+
+    .slider {
+      width: 360px;
+      margin-top: 40px;
+      margin-bottom: 50px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      appearance: none;
+      background: #222;
+      height: 8px;
+      border-radius: 5px;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #999;
+      border-radius: 50%;
+      border: 2px solid #555;
+      cursor: pointer;
+    }
+
+    .time-buttons {
+      display: flex;
+      margin-top: 40px;
+      gap: 40px;
+      justify-content: center;
+    }
+
+    .time-buttons button {
+      background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 15px 35px;
+      font-size: 36px;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.05),
+        0 3px 6px rgba(0,0,0,0.6);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .time-buttons button:active {
+      transform: scale(0.96);
+    }
+	
+	.active-transition {
+  outline: 3px solid yellow;
+  box-shadow: 0 0 10px yellow;
+  transition: all 0.2s ease-in-out;
+}
+
+.blink-transition {
+  outline: 3px solid yellow;
+  box-shadow: 0 0 10px yellow;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%   { outline-color: yellow; box-shadow: 0 0 10px yellow; }
+  50%  { outline-color: transparent; box-shadow: none; }
+  100% { outline-color: yellow; box-shadow: 0 0 10px yellow; }
+}
+
+	
+  </style>
+</head>
+<body>
+  <!-- Bandeau supérieur -->
+  <div class="top-bar">
+    <button class="back-button" onclick="goBack()">← Accueil</button>
+
+    <div class="transition-buttons">
+      <button class="transition-button">MIX</button>
+      <button class="transition-button">DIP</button>
+      <button class="transition-button">WIPE</button>
+      <button class="transition-button">STING</button>
+      <button class="transition-button">DVE</button>
+    </div>
+
+    <div class="me-select-container">
+      <label for="meSelect">ME :</label>
+      <select id="meSelect">
+        <option value="0">ME 1</option>
+        <option value="1">ME 2</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="container">
+    <h1>Réglage Mix</h1>
+    <div class="transition-time" id="transitionTime">Chargement...</div>
+
+    <div class="slider">
+      <input type="range" min="1" max="250" id="slider" oninput="sliderChange(this.value)">
+    </div>
+
+    <div class="time-buttons">
+      <button id="btnMinus" onclick="changeDuration(-1)">−</button>
+      <button id="btnPlus" onclick="changeDuration(1)">+</button>
+    </div>
+  </div>
+
+  <script>
+  const meSelect = document.getElementById('meSelect');
+  const buttons = document.querySelectorAll('.transition-button');
+
+  // Synchronise la sélection ME depuis le localStorage
+  function loadSelectedME() {
+    const savedME = localStorage.getItem('selectedME') || '0';
+    meSelect.value = savedME;
+  }
+
+  meSelect.addEventListener('change', () => {
+    localStorage.setItem('selectedME', meSelect.value);
+    updateDisplay();
+    pollTransitionState();  // MAJ immédiate après changement ME
+  });
+
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  function formatAtemExact(frames) {
+    if (frames < 25) return `0.${frames.toString().padStart(2, '0')}s`;
+    const block = Math.floor(frames / 25);
+    const offset = frames % 25;
+    return offset === 0 ? `${block}:00` : `${block}:${offset.toString().padStart(2, '0')}`;
+  }
+
+  async function fetchCurrentDuration() {
+    const me = meSelect.value;
+    const res = await fetch(`/currentDuration?me=${me}`);
+    const data = await res.json();
+    return data.duration;
+  }
+
+  async function updateDisplay() {
+    const frames = await fetchCurrentDuration();
+    const atemDisplay = formatAtemExact(frames);
+    document.getElementById('transitionTime').innerText = `Durée : ${atemDisplay}`;
+    document.getElementById('slider').value = frames;
+  }
+
+  async function changeDuration(delta) {
+    const me = meSelect.value;
+    await fetch(`/changeDuration?delta=${delta}&me=${me}`);
+    updateDisplay();
+  }
+
+  async function sliderChange(value) {
+    const current = await fetchCurrentDuration();
+    const target = parseInt(value);
+    const delta = target - current;
+    if (delta !== 0) {
+      const me = meSelect.value;
+      await fetch(`/changeDuration?delta=${delta}&me=${me}`);
+      updateDisplay();
+    }
+  }
+
+  // -------- Gestion des transitions --------
+  buttons.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const style = btn.textContent.trim(); // Exemple: "MIX"
+      const styleMap = { MIX: 0, DIP: 1, WIPE: 2, STING: 4, DVE: 3 };
+      const me = meSelect.value;
+
+      try {
+        const res = await fetch(`/transition/${styleMap[style]}?me=${me}`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          pollTransitionState();
+        } else {
+          console.warn('Échec de la commande:', data);
+        }
+      } catch (err) {
+        console.error('Erreur lors de la transition:', err.message);
+      }
+    });
+  });
+
+  // MAJ état visuel transition
+  async function pollTransitionState() {
+    const me = meSelect.value;
+
+    try {
+      const res = await fetch(`/state?me=${me}`);
+      const state = await res.json();
+
+      buttons.forEach(btn => {
+        const styleText = btn.textContent.trim();
+        const styleMap = { MIX: 0, DIP: 1, WIPE: 2, STING: 4, DVE: 3 };
+        const btnStyle = styleMap[styleText];
+
+        btn.classList.remove('active-transition', 'blink-transition');
+
+        if (state.inTransition) {
+          if (btnStyle === state.activeStyle) {
+            btn.classList.add('blink-transition');
+          } else if (btnStyle === state.currentStyle) {
+            btn.classList.add('active-transition');
+          }
+        } else {
+          if (btnStyle === state.currentStyle) {
+            btn.classList.add('active-transition');
+          }
+        }
+      });
+    } catch (err) {
+      console.error('Erreur de polling:', err.message);
+    }
+  }
+
+  // Lancement initial
+  loadSelectedME();
+  updateDisplay();
+  pollTransitionState();
+  setInterval(pollTransitionState, 250);
+</script>
+
+</body>
+</html>

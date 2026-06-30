@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Réglages SuperSource</title>
+  <meta name="viewport" content="width=1280, height=800, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      background: #111; color: white;
+      font-family: sans-serif;
+      width: 1280px; height: 800px; overflow: auto;
+      font-size: 25px;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 38px;
+    }
+	
+	body {
+	  background-image: url("/images/background_global_iatem.png");
+	}
+
+
+
+body::-webkit-scrollbar {
+  width: 0px;                    /* Chrome/Safari/Edge */
+  height: 0px;
+}
+
+
+	
+    .container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .nav-buttons {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .nav-buttons button {
+      background: #333;
+      border: none;
+      color: white;
+      font-size: 25px;
+      padding: 12px 24px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .nav-buttons button.active {
+      background-color: #05a;
+      font-weight: bold;
+    }
+    .box-config {
+      border-bottom: 1px solid #444;
+      padding-bottom: 20px;
+      display: none;
+    }
+    label {
+      font-size: 25px;
+      margin: 10px 16px;
+    }
+    select {
+      background: #222; 
+      color: #fff;
+      border: none; 
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 25px;
+      width: 340px;
+      margin: 20px 180px;
+    }
+    input[type="number"] {
+      background: #222; 
+      color: #fff;
+      border: none; 
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 25px;
+      width: 120px;
+      margin: 0 10px;
+    }
+    .control-row {
+      display: flex;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .control-row label {
+      width: 110px;
+	  text-align: right;
+    }
+    .control-row button {
+      background: #444;
+      color: #fff;
+      font-size: 28px;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      margin: 0 6px;
+      cursor: pointer;
+    }
+    .back-button {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #444;
+      border: none;
+      padding: 12px 18px;
+      font-size: 24px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+    .back-button:hover { background: #555; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+	
+		.preset-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 63px;
+  margin-bottom: 20px;
+  padding-bottom: 40px;
+  padding-top: 40px;
+}
+
+.preset-buttons button {
+  background: none;
+  border: none;
+  padding: 0;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+}
+
+.preset-buttons img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #333;
+}
+
+.crop-value {
+  font-size: 24px;
+  padding: 6px 14px;
+  background: #222;
+  color: #0af;
+  border-radius: 4px;
+  min-width: 70px;
+  text-align: center;
+  margin: 0 6px;
+}
+
+.crop-row {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.crop-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.separator-line {
+  border-top: 1px solid #ccc;
+  margin: 70px 0;
+}
+
+
+input[type="checkbox"] {
+  transform: scale(2); /* agrandit la case de 150% */
+  margin-right: 8px;     /* espace entre la case et le label */
+  cursor: pointer;
+}
+
+
+button {
+  user-select: none;       /* désactive la sélection de texte */
+  -webkit-user-select: none; /* compatibilité Safari/Chrome */
+  -moz-user-select: none;    /* compatibilité Firefox */
+}
+
+button.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: default;
+}
+
+.crop-value.disabled {
+  opacity: 0.5;
+}
+
+
+  </style>
+</head>
+<body>
+
+  <button class="back-button" onclick="goBack()">← Accueil</button>
+
+  <div class="container">
+    <h1>🖥️ Réglages SuperSource</h1>
+	
+	<div class="preset-buttons">
+      <button onclick="applyPreset(1)"><img src="/images/supersource1.jpg" alt="Preset 1"></button>
+      <button onclick="applyPreset(2)"><img src="/images/supersource2.jpg" alt="Preset 2"></button>
+      <button onclick="applyPreset(3)"><img src="/images/supersource3.jpg" alt="Preset 3"></button>
+      <button onclick="applyPreset(4)"><img src="/images/supersource4.jpg" alt="Preset 4"></button>
+    </div>
+	
+	
+    <div class="nav-buttons" id="boxNav"></div>
+    <div id="boxConfigs"></div>
+  </div>
+
+  <script>
+  
+    window.addEventListener('contextmenu', e => e.preventDefault());
+
+  
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+async function applyPreset(presetIndex) {
+  try {
+        const res = await fetch(`/applySuperSourcePreset?preset=${presetIndex}`);
+        const data = await res.json();
+//        console.log("✅ Réponse du serveur :", data);
+        init(); // Recharge l’état après application du preset
+      } catch (err) {
+      console.error('❌ Erreur preset SuperSource :', err);
+    }
+}
+
+
+    async function fetchInputsList() {
+      const res = await fetch('/inputsList');
+      return res.json();
+    }
+
+    async function fetchSuperSourceBoxes() {
+      const res = await fetch('/getSuperSource');
+      return res.json();
+    }
+
+ 
+    async function updateBox(index, field, value) {
+  try {
+    let finalValue = value;
+
+    if (['top', 'bottom', 'left', 'right'].includes(field)) {
+      finalValue = parseFloat(value).toFixed(3);
+    }
+
+    if (field === 'cropped') {
+      finalValue = value ? 'true' : 'false'; // ✅ chaîne explicite pour l’URL
+    }
+
+    const url = `/setSuperSourceBox?index=${index}&${field}=${finalValue}`;
+    await fetch(url);
+    console.log(`✅ Fenêtre ${index + 1} mise à jour : ${field} = ${finalValue}`);
+  } catch (err) {
+    console.error('❌ Échec mise à jour SuperSource:', err);
+  }
+}
+
+
+    function attachAdjustEvents(button, input, delta, field, boxIndex) {
+      let interval;
+
+      const start = () => {
+        interval = setInterval(() => {
+          let newVal = parseFloat(input.value) + delta;
+
+          let min = 0, max = 1;
+          if (field === 'x') { min = -48; max = 48; }
+          else if (field === 'y') { min = -27; max = 27; }
+          else if (field === 'width') { min = 0.07; max = 1; }
+
+          newVal = Math.max(min, Math.min(newVal, max));
+          input.value = newVal.toFixed(2);
+
+          const scaledVal = field === 'width'
+            ? Math.round(newVal * 1000)
+            : Math.round(newVal * 100);
+
+          updateBox(boxIndex, field, scaledVal);
+        }, 100);
+      };
+
+      const stop = () => clearInterval(interval);
+
+      button.addEventListener('mousedown', start);
+      button.addEventListener('touchstart', start);
+      button.addEventListener('mouseup', stop);
+      button.addEventListener('mouseleave', stop);
+      button.addEventListener('touchend', stop);
+    }
+
+    function createBoxUI(boxData, inputs) {
+  const widthValue = (typeof boxData.width === 'number')
+    ? (boxData.width / 1000).toFixed(2)
+    : "";
+
+  const boxDiv = document.createElement('div');
+  boxDiv.className = 'box-config';
+  boxDiv.id = `box-${boxData.box}`;
+  boxDiv.innerHTML = `
+    <label>Activer Source:</label>
+    <input type="checkbox" ${boxData.enabled ? 'checked' : ''}
+      onchange="updateBox(${boxData.box}, 'enabled', this.checked)">
+
+    <select onchange="updateBox(${boxData.box}, 'source', this.value)">
+      ${inputs.map(i => `<option value="${i.id}" ${i.id == boxData.source ? 'selected' : ''}>${i.name}</option>`).join('')}
+    </select>
+
+    <div class="control-row">
+      <label>X :</label>
+      <button>−</button>
+      <input type="number" step="0.01" min="-48" max="48" value="${(boxData.x / 100).toFixed(2)}">
+      <button>+</button>
+
+      <label>Y :</label>
+      <button>−</button>
+      <input type="number" step="0.01" min="-27" max="27" value="${(boxData.y / 100).toFixed(2)}">
+      <button>+</button>
+    </div>
+
+    <div class="control-row">
+      <label>Largeur :</label>
+      <button>−</button>
+      <input type="number" step="0.01" min="0.07" max="1" value="${widthValue}">
+      <button>+</button>
+    </div>
+
+    <div class="separator-line"></div>
+
+
+    <div class="control-row">
+      <label>Crop :</label>
+      <input type="checkbox" ${boxData.cropped ? 'checked' : ''}
+        onchange="toggleCrop(${boxData.box}, this.checked)">
+    </div>
+
+
+<div class="control-row crop-controls" id="crop-controls-${boxData.box}">
+  <div class="crop-row">
+    ${['top', 'bottom'].map(field => {
+      const val = (boxData[field] ?? 0);
+      const displayVal = (val / 1000).toFixed(2);
+      return `
+        <div class="crop-group">
+          <label>${field.charAt(0).toUpperCase() + field.slice(1)} :</label>
+          <button id="btn-${field}-down-${boxData.box}">−</button>
+          <div class="crop-value" id="crop-${field}-${boxData.box}">${displayVal}</div>
+          <button id="btn-${field}-up-${boxData.box}">+</button>
+        </div>
+      `;
+    }).join('')}
+  </div>
+
+  <div class="crop-row">
+    ${['left', 'right'].map(field => {
+      const val = (boxData[field] ?? 0);
+      const displayVal = (val / 1000).toFixed(2);
+      return `
+        <div class="crop-group">
+          <label>${field.charAt(0).toUpperCase() + field.slice(1)} :</label>
+          <button id="btn-${field}-down-${boxData.box}">−</button>
+          <div class="crop-value" id="crop-${field}-${boxData.box}">${displayVal}</div>
+          <button id="btn-${field}-up-${boxData.box}">+</button>
+        </div>
+      `;
+    }).join('')}
+  </div>
+</div>
+
+
+  `;
+
+  // 🔗 Boutons crop
+  const cropButtons = boxDiv.querySelectorAll(`#crop-controls-${boxData.box} button`);
+  const cropInputs = boxDiv.querySelectorAll(`#crop-controls-${boxData.box} input[type="number"]`);
+  const cropFields = ['top', 'top', 'bottom', 'bottom', 'left', 'left', 'right', 'right'];
+  const cropDeltas = [-0.01, 0.01, -0.01, 0.01, -0.01, 0.01, -0.01, 0.01];
+
+  for (let i = 0; i < cropButtons.length; i++) {
+  const input = cropInputs[Math.floor(i / 2)];
+  const button = cropButtons[i];
+  const field = cropFields[i];
+  const delta = cropDeltas[i];
+
+  if (!button || !input) continue; // 🔒 ignore si l'un est absent
+
+  button.addEventListener('click', () => {
+    const current = parseFloat(input.value);
+    const newVal = Math.max(0, current + delta);
+    input.value = newVal.toFixed(2);
+    const final = Math.round(newVal * 1000);
+    updateBox(boxData.box, field, final);
+  });
+
+  input.addEventListener('change', () => {
+    const val = parseFloat(input.value);
+    if (!isNaN(val)) {
+      input.value = val.toFixed(2);
+      updateBox(boxData.box, input.dataset.field, Math.round(val * 1000));
+    }
+  });
+}
+
+const cropDiv = boxDiv.querySelector(`#crop-controls-${boxData.box}`);
+if (cropDiv) {
+  cropDiv.querySelectorAll('button, .crop-value').forEach(el => {
+    el.disabled = !boxData.cropped;
+    el.classList.toggle('disabled', !boxData.cropped); // si tu utilises la classe CSS
+  });
+}
+
+
+  // 🎯 Boutons classiques (X/Y/Width)
+  const buttons = boxDiv.querySelectorAll('.control-row:not(.crop-controls) button');
+  const inputsList = boxDiv.querySelectorAll('.control-row:not(.crop-controls) input[type="number"]');
+  const fields = ['x', 'x', 'y', 'y', 'width', 'width'];
+  const deltas = [-0.01, 0.01, -0.01, 0.01, -0.01, 0.01];
+
+  for (let i = 0; i < buttons.length; i++) {
+    attachAdjustEvents(buttons[i], inputsList[Math.floor(i / 2)], deltas[i], fields[i], boxData.box);
+  }
+  
+  
+['top', 'bottom', 'left', 'right'].forEach(field => {
+  const btnDown = boxDiv.querySelector(`#btn-${field}-down-${boxData.box}`);
+  const btnUp = boxDiv.querySelector(`#btn-${field}-up-${boxData.box}`);
+
+  if (btnDown) attachCropEvents(btnDown, field, boxData.box, -10);
+  if (btnUp) attachCropEvents(btnUp, field, boxData.box, +10);
+});
+
+  return boxDiv;
+}
+
+
+async function showBox(index) {
+  const [ssState, inputs] = await Promise.all([
+    fetchSuperSourceBoxes(),
+    fetchInputsList()
+  ]);
+
+  const container = document.getElementById('boxConfigs');
+  container.innerHTML = '';
+
+  ssState.boxes.forEach(box => {
+    container.appendChild(createBoxUI(box, inputs));
+  });
+
+  document.querySelectorAll('.box-config').forEach(div => div.style.display = 'none');
+  const selectedBox = document.getElementById(`box-${index}`);
+  if (selectedBox) selectedBox.style.display = 'block';
+
+  document.querySelectorAll('.nav-buttons button').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById(`btn-${index}`);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+<!-- debut de crop script -->
+
+function toggleCrop(index, isActive) {
+  updateBox(index, 'cropped', isActive);
+  const cropDiv = document.getElementById(`crop-controls-${index}`);
+  if (cropDiv) {
+    cropDiv.querySelectorAll('input, button, .crop-value').forEach(el => {
+      el.disabled = !isActive;
+      el.style.opacity = isActive ? '1' : '0.5';
+	  el.classList.toggle('disabled', !isActive);
+    });
+  }
+}
+
+function attachCropEvents(button, field, boxIndex, delta) {
+  let interval;
+  const cropMaxValues = {
+    top: 18000,
+    bottom: 18000,
+    left: 32000,
+    right: 32000
+  };
+
+  const adjustValue = () => {
+    const div = document.getElementById(`crop-${field}-${boxIndex}`);
+    let currentVal = parseFloat(div.textContent) * 1000;
+    if (isNaN(currentVal)) currentVal = 0;
+
+    let newVal = currentVal + delta;
+    let max = cropMaxValues[field];
+    newVal = Math.max(0, Math.min(newVal, max));
+
+    div.textContent = (newVal / 1000).toFixed(2);
+    updateBox(boxIndex, field, Math.round(newVal));
+  };
+
+  
+  button.addEventListener('pointerdown', () => {
+  adjustValue(); // action immédiate
+  timeout = setTimeout(() => {
+    interval = setInterval(adjustValue, 120);
+  }, 500); // délai avant la répétition
+});
+
+button.addEventListener('pointerup', () => {
+  clearTimeout(timeout);
+  clearInterval(interval);
+});
+
+button.addEventListener('pointerleave', () => {
+  clearTimeout(timeout);
+  clearInterval(interval);
+});
+
+
+
+}
+
+    async function init() {
+      const inputs = await fetchInputsList();
+      const ssState = await fetchSuperSourceBoxes();
+
+      const container = document.getElementById('boxConfigs');
+      const nav = document.getElementById('boxNav');
+      container.innerHTML = '';
+      nav.innerHTML = '';
+
+      ssState.boxes.forEach(box => {
+        container.appendChild(createBoxUI(box, inputs));
+                const btn = document.createElement('button');
+        btn.textContent = `Fenêtre ${box.box + 1}`;
+        btn.id = `btn-${box.box}`;
+        btn.onclick = () => showBox(box.box);
+        nav.appendChild(btn);
+      });
+
+      showBox(0);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

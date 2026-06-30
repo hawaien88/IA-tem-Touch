@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuration AUX</title>
+  <meta name="viewport" content="width=1280, height=800">
+  <style>
+    body {
+      margin: 0;
+      background-color: #0d0d0d;
+      background-image: url("/images/background_global_iatem.png");
+	  font-family: sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    .back-button {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #444;
+      border: none;
+      padding: 10px 16px;
+      font-size: 18px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 30px;
+      padding: 100px 40px 40px;
+      box-sizing: border-box;
+	  
+  /* 🔥 Centrage vertical uniquement */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 0;
+  width: 100%;
+    }
+
+    .aux-block {
+      background: #1f1f1f;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 8px #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .aux-block h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 24px;
+      color: #ccc;
+    }
+
+    .aux-block select {
+      padding: 10px 14px;
+      font-size: 18px;
+      border-radius: 6px;
+      border: none;
+      background-color: #333;
+      color: white;
+      width: 100%;
+      max-width: 240px;
+    }
+
+    select:focus {
+      outline: none;
+      box-shadow: 0 0 4px #008cff;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="back-button" onclick="goBack()">← Accueil</button>
+
+  <div class="grid" id="auxGrid">
+    <!-- Blocs AUX seront générés par JS -->
+  </div>
+
+  <script>
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    async function loadInputs() {
+      const res = await fetch("/auxInputsList");
+      return await res.json();
+    }
+
+    async function loadAuxSources() {
+      const res = await fetch("/getAuxSources");
+      const data = await res.json();
+      return data.sources || [];
+    }
+
+    async function loadAuxInfo() {
+      const res = await fetch("/auxInfo");
+      return await res.json();
+    }
+
+    async function updateAux(auxIndex, sourceId) {
+      await fetch(`/setAuxSource?aux=${auxIndex}&source=${sourceId}`);
+    }
+
+    // Libellé adapté au modèle (fourni par le serveur via /auxInfo, avec repli)
+    function auxLabel(info, i) {
+      if (info.outputs && info.outputs[i] && info.outputs[i].label) return info.outputs[i].label;
+      if (info.isMini) {
+        if (info.count <= 1) return "Sortie HDMI / Webcam";
+        return i === 0 ? "Sortie HDMI" : "Sortie USB (Webcam)";
+      }
+      return `AUX ${i + 1}`;
+    }
+
+    async function init() {
+      const auxGrid = document.getElementById("auxGrid");
+      auxGrid.innerHTML = "";
+
+      const info = await loadAuxInfo();
+
+      // Aucune sortie AUX disponible (ATEM non connecté ou modèle sans AUX)
+      if (!info.count) {
+        auxGrid.style.display = "block";
+        auxGrid.innerHTML =
+          `<div style="text-align:center;font-size:26px;color:#ccc">` +
+          (info.connected ? "Ce modèle ne dispose d'aucune sortie AUX." : "ATEM non connecté.") +
+          `</div>`;
+        return;
+      }
+
+      const inputs = await loadInputs();
+      const auxState = await loadAuxSources();
+
+      // Grille adaptée au nombre réel de sorties (max 3 colonnes)
+      const cols = Math.min(info.count, 3);
+      auxGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      auxGrid.style.gridTemplateRows = `repeat(${Math.ceil(info.count / cols)}, 1fr)`;
+
+      for (let i = 0; i < info.count; i++) {
+        const block = document.createElement("div");
+        block.className = "aux-block";
+
+        const title = document.createElement("h2");
+        title.textContent = auxLabel(info, i);
+        block.appendChild(title);
+
+        // Restriction de sources éventuelle pour cette sortie (ex : Webcam = Multiview/Program/Preview)
+        const allowed = info.outputs && info.outputs[i] ? info.outputs[i].allowed : null;
+        const sourceList = allowed ? inputs.filter(inp => allowed.includes(inp.id)) : inputs;
+
+        const select = document.createElement("select");
+        sourceList.forEach(input => {
+          const option = document.createElement("option");
+          option.value = input.id;
+          option.textContent = input.name;
+          if (input.id === auxState[i]) option.selected = true;
+          select.appendChild(option);
+        });
+
+        select.addEventListener("change", () => {
+          updateAux(i, parseInt(select.value));
+        });
+
+        block.appendChild(select);
+        auxGrid.appendChild(block);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

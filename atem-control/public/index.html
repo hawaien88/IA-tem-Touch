@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>ATEM Touch Panel</title>
+  <meta name="viewport" content="width=1280, height=800, initial-scale=1.0" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+	  background: #111;
+      color: white;
+      font-family: sans-serif;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+    }
+
+    body {
+	  background-image: url("/images/background_global_iatem.png");
+	}
+
+    #menu {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 30px;
+      padding: 60px;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    .menu-button {
+      background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 28px;
+      text-align: center;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.05),
+        0 4px 8px rgba(0,0,0,0.8);
+      padding: 25px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      transition: transform 0.1s;
+      cursor: pointer;
+    }
+
+    .menu-button:active {
+      background: linear-gradient(to bottom, #1a1a1a, #2e2e2e);
+      transform: scale(0.97);
+    }
+
+    /* Bouton d'une fonction absente du modèle connecté (ex : SuperSource sur Mini Pro) */
+    .menu-button.disabled {
+      opacity: 0.35;
+      filter: grayscale(1);
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    /* Tuile vide : occupe une case de la grille sans rien afficher */
+    .menu-empty {
+      visibility: hidden;
+    }
+
+    /* Styles pour le container Transition */
+    .transition-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: stretch;
+      background: #1a1a1a;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.8);
+      font-size: 22px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .transition-top {
+      background: linear-gradient(to bottom, #333, #1a1a1a);
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid #444;
+    }
+
+    .transition-bottom {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 8px 8px 17px 10px;
+      gap: 4px;
+    }
+
+    /* Boutons communs à transition et réglages */
+    .transition-button {
+      flex: 1;
+      background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+      border-radius: 8px;
+      padding: 10px 8px;
+      min-width: 0;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.05),
+        0 4px 8px rgba(0,0,0,0.8);
+      font-size: 16px;
+      transition: transform 0.1s;
+      cursor: pointer;
+    }
+
+    .transition-button:active {
+      background: linear-gradient(to bottom, #1a1a1a, #2e2e2e);
+      transform: scale(0.97);
+    }
+
+    .active-transition {
+      outline: 3px solid yellow;
+      box-shadow: 0 0 10px yellow;
+      transition: all 0.2s ease-in-out;
+    }
+
+    @keyframes blink {
+      0% { outline-color: yellow; box-shadow: 0 0 10px yellow; }
+      50% { outline-color: transparent; box-shadow: none; }
+      100% { outline-color: yellow; box-shadow: 0 0 10px yellow; }
+    }
+
+    .blink-transition {
+      outline: 3px solid yellow;
+      box-shadow: 0 0 10px yellow;
+      animation: blink 1s infinite;
+    }
+
+    .transition-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px 0;
+      gap: 4px;
+      height: 24px;
+      background: #1a1a1a;
+    }
+
+    .transition-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #777;
+      box-shadow: inset 0 0 2px #000;
+      transition: background-color 0.2s;
+    }
+
+    .transition-dot.active {
+      background-color: yellow;
+      box-shadow: 0 0 6px yellow;
+    }
+
+    /* --- NOUVELLES CLASSES pour Réglages --- */
+    .settings-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: stretch;
+      background: #222;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(255,255,255,0.05);
+      font-size: 20px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .settings-top {
+      position: relative;
+      background: linear-gradient(to bottom, #444, #222);
+      padding: 18px;
+      text-align: center;
+      font-weight: 700;
+      border-bottom: 1px solid #666;
+      letter-spacing: 1px;
+    }
+
+    /* Bouton discret plein écran / fenêtré, dans la barre "Réglages DIP MIX WIPE" */
+    .fs-toggle {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid #777;
+      color: #ddd;
+      font-size: 16px;
+      line-height: 1;
+      padding: 5px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .fs-toggle:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .settings-bottom {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      padding: 12px 20px 20px 20px;
+      gap: 10px;
+    }
+	
+.status-indicator {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  z-index: 100;
+}
+
+/* RPi : triangle avec l’angle droit dans le coin bas gauche */
+#rpiStatus {
+  bottom: 0;
+  left: 0;
+  border-width: 0 40px 40px 0;
+  border-color: transparent transparent red transparent;
+  display: none;
+}
+
+/* ATEM : triangle avec l’angle droit dans le coin bas droit */
+#atemStatus {
+  bottom: 0;
+  right: 0;
+  border-width: 0 0 40px 40px;
+  border-color: transparent transparent red transparent;
+  display: none;
+}
+
+
+
+
+	
+	
+	
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <a class="menu-button" href="mix.html">Mix</a>
+	<!-- Bouton Réglages divisé -->
+    <div class="settings-container">
+      <div class="settings-top">Réglages DIP MIX WIPE<button id="fsToggle" class="fs-toggle" title="Plein écran / Fenêtré" onclick="toggleFullscreen()">⛶</button></div>
+      <div class="settings-bottom">
+        <button id="btnME1" class="transition-button">ME1</button>
+        <button id="btnME2" class="transition-button">ME2</button>
+      </div>
+    </div>
+    <a class="menu-button" href="dip.html">DIP</a>
+    <a class="menu-button" href="wipe.html">Wipe</a>
+    <a class="menu-button" href="macro.html">Macros</a>
+	<a class="menu-button" href="mediaplayer.html">Media Player</a>
+	<a class="menu-button" id="btnSupersource" href="supersource.html">SuperSource</a>
+    <a class="menu-button" href="auxatem.html">AUX</a>
+	<a class="menu-button" href="atem-ip.html">IP ATEM</a>
+    <!-- Tuile vide pour centrer Transition -->
+    <div class="menu-empty"></div>
+    <!-- Bouton Transition divisé -->
+    <div class="transition-container">
+      <div class="transition-top">Transition</div>
+      <div class="transition-bar"></div>
+      <div class="transition-bottom">
+        <button class="transition-button transition-btn" data-style="0">MIX</button>
+        <button class="transition-button transition-btn" data-style="1">DIP</button>
+        <button class="transition-button transition-btn" data-style="2">WIPE</button>
+        <button class="transition-button transition-btn" data-style="4">STING</button>
+        <button class="transition-button transition-btn" data-style="3">DVE</button>
+      </div>
+    </div>
+    <a class="menu-button" id="btnConfigRpi" href="#">CONFIG RPI</a>
+  </div>
+
+  <script>
+    // Bascule plein écran <-> fenêtré (API Fullscreen standard du navigateur).
+    // En mode fenêtré, Chrome (lancé en --app) affiche sa barre de fenêtre
+    // avec les boutons minimiser / fermer, pour pouvoir quitter si besoin.
+    function toggleFullscreen() {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      } else {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    }
+
+    // Met à jour l'icône du bouton selon l'état réel du plein écran
+    document.addEventListener('fullscreenchange', () => {
+      const b = document.getElementById('fsToggle');
+      if (b) b.textContent = document.fullscreenElement ? '🗗' : '⛶';
+    });
+
+    // Gestion locale des boutons ME1/ME2 pour les réglages (localStorage)
+    const btnME1 = document.getElementById('btnME1');
+    const btnME2 = document.getElementById('btnME2');
+
+    function selectME(me) {
+      localStorage.setItem('selectedME', me);
+      btnME1.classList.toggle('active-transition', me === '0');
+      btnME2.classList.toggle('active-transition', me === '1');
+    }
+
+    btnME1.addEventListener('click', () => selectME('0'));
+    btnME2.addEventListener('click', () => selectME('1'));
+
+    const savedME = localStorage.getItem('selectedME') || '0';
+    selectME(savedME);
+
+    // ME actif réel en provenance du RPi (push via route /me-current)
+    let currentActiveME = '0';
+
+    // Création des points pour la barre de progression
+    const bar = document.querySelector('.transition-bar');
+    const dotCount = 20;
+    const dots = [];
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('div');
+      dot.classList.add('transition-dot');
+      bar.appendChild(dot);
+      dots.push(dot);
+    }
+
+    // Fonction pour récupérer le ME actif réel via la nouvelle route dédiée
+    async function pollCurrentME() {
+      try {
+        const res = await fetch('/me-current');
+        const data = await res.json();
+        if (typeof data.activeME !== 'undefined') {
+          currentActiveME = String(data.activeME);
+        }
+      } catch (err) {
+        console.error('Erreur récupération ME actif réel:', err);
+      }
+    }
+
+
+async function pollTransitionState() {
+  if (!atemOnline) {
+    const transitionTop = document.querySelector('.transition-container .transition-top');
+    if (transitionTop) transitionTop.textContent = 'ATEM non connecté';
+    dots.forEach(dot => dot.classList.remove('active'));
+    document.querySelectorAll('.transition-btn').forEach(btn => {
+      btn.classList.remove('active-transition', 'blink-transition');
+    });
+    return;
+  }
+
+  if (currentActiveME === null || currentActiveME === undefined || currentActiveME === '') {
+    const transitionTop = document.querySelector('.transition-container .transition-top');
+    if (transitionTop) transitionTop.textContent = 'En attente de mise à jour…';
+    dots.forEach(dot => dot.classList.remove('active'));
+    document.querySelectorAll('.transition-btn').forEach(btn => {
+      btn.classList.remove('active-transition', 'blink-transition');
+    });
+    return;
+  }
+
+  try {
+    const res = await fetch(`/state?me=${currentActiveME}`);
+    const state = await res.json();
+
+    // Mise à jour boutons transition
+    document.querySelectorAll('.transition-btn').forEach(btn => {
+      const btnStyle = parseInt(btn.dataset.style, 10);
+      btn.classList.remove('active-transition', 'blink-transition');
+
+      if (state.inTransition) {
+        if (btnStyle === state.activeStyle) {
+          btn.classList.add('blink-transition');
+        } else if (btnStyle === state.currentStyle) {
+          btn.classList.add('active-transition');
+        }
+      } else {
+        if (btnStyle === state.currentStyle) {
+          btn.classList.add('active-transition');
+        }
+      }
+    });
+
+    const transitionTop = document.querySelector('.transition-container .transition-top');
+    if (transitionTop) {
+      transitionTop.textContent = state.inTransition ? 'Transition en cours…' : 'Transition';
+    }
+
+    const progress = state.position ?? 0;
+    const activeDots = Math.floor((progress / 10000) * dotCount);
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i < activeDots);
+    });
+
+  } catch (err) {
+    console.error('Erreur polling transition:', err.message);
+  }
+}
+
+
+
+    // Poll complet : récupère ME actif réel puis état transition
+    async function pollAll() {
+      await pollCurrentME();
+      await pollTransitionState();
+    }
+
+    // Lancement du polling toutes les 250ms
+    setInterval(pollAll, 250);
+
+    // Gestion des clics sur boutons transition pour envoyer commande POST
+    document.querySelectorAll('.transition-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const style = btn.dataset.style;
+
+        try {
+          const res = await fetch(`/transition/${style}?me=${currentActiveME}`, { method: 'POST' });
+          const data = await res.json();
+          if (data.success) {
+            pollTransitionState();
+          } else {
+            console.warn('Commande transition échouée:', data);
+          }
+        } catch (err) {
+          console.error('Erreur transition:', err.message);
+        }
+      });
+    });
+	
+	
+	
+//	ajout ping
+
+// === Raspberry Pi compagnon (optionnel) ===
+// IP du Raspberry Pi qui sert la page de configuration du pupitre.
+// Laisser vide ("") si tu utilises cette app SANS Raspberry Pi :
+// le bouton "CONFIG RPI" sera alors automatiquement grisé (pas de page 404).
+const rpiIP = ""; // ex. "192.168.12.103"
+
+// Active ou grise le bouton "CONFIG RPI" selon que rpiIP est renseigné
+(function configureRpiButton() {
+  const btn = document.getElementById('btnConfigRpi');
+  if (!btn) return;
+  if (rpiIP && rpiIP.trim() !== '') {
+    btn.href = `http://${rpiIP}:3000/config.html`;
+  } else {
+    btn.classList.add('disabled');
+    btn.removeAttribute('href');
+  }
+})();
+
+let atemOnline = true; // supposé connecté au démarrage
+
+async function pingHost(ip, timeout = 3000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(`http://${ip}:3000/ping`, { signal: controller.signal });
+    clearTimeout(timer);
+    return res.ok;
+  } catch {
+    clearTimeout(timer);
+    return false;
+  }
+}
+
+async function updateStatusIndicators() {
+  // Ping RPi
+  if (rpiIP) {
+    const rpiReachable = await pingHost(rpiIP);
+    const rpiEl = document.getElementById('rpiStatus');
+    if (rpiEl) rpiEl.style.display = rpiReachable ? 'none' : 'block';
+  }
+
+  // Ping ATEM via statut
+  try {
+    const res = await fetch('/atem-status');
+    const data = await res.json();
+    atemOnline = data.status === 'connected';
+  } catch (err) {
+    console.error("Erreur récupération état ATEM :", err);
+    atemOnline = false;
+  }
+
+  const atemEl = document.getElementById('atemStatus');
+  if (atemEl) atemEl.style.display = atemOnline ? 'none' : 'block';
+
+  updateCapabilities();
+}
+
+// Grise les fonctions absentes du modèle connecté (ex : SuperSource sur ATEM Mini Pro)
+async function updateCapabilities() {
+  try {
+    const res = await fetch('/atemCaps');
+    const caps = await res.json();
+    const ss = document.getElementById('btnSupersource');
+    if (ss) {
+      // Désactivé seulement si l'ATEM est connecté ET n'a pas de SuperSource
+      const noSS = caps.connected && caps.superSources === 0;
+      ss.classList.toggle('disabled', noSS);
+    }
+  } catch (e) { /* ATEM non joignable : on ne change rien */ }
+}
+
+// Lancer une fois DOM prêt
+document.addEventListener('DOMContentLoaded', () => {
+  updateStatusIndicators();                 // Premier check immédiat
+  setTimeout(updateStatusIndicators, 5000); // Petit décalage pour détection post-boot ATEM
+  setInterval(updateStatusIndicators, 10000); // Toutes les 10 sec
+});
+</script>
+  
+  <div id="rpiStatus" class="status-indicator"></div>
+  <div id="atemStatus" class="status-indicator"></div>
+
+</body>
+</html>

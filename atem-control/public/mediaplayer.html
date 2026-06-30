@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Média Players</title>
+  <meta name="viewport" content="width=1280, height=800, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+    }
+	
+	body {
+	  background-image: url("/images/background_global_iatem.png");
+	}
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 80%;
+    }
+
+    .panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 2px solid #222;
+	  padding-top: 100px; /* ← diminue si tu veux remonter */
+      margin-bottom: -83px; /* ← recolle les panels entre eux */
+	  padding-bottom: 50px;
+    }
+
+    .panel:last-child {
+      border-bottom: none;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 42px;
+    }
+
+    select {
+      font-size: 28px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+      cursor: pointer;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: #444;
+      border: none;
+      padding: 10px 16px;
+      color: white;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      transition: background 0.2s;
+    }
+
+    .back-button:hover {
+      background: #555;
+    }
+	
+	.text-sous-select {
+	  font-size: 15px;
+      padding: 5px 10px;
+    }
+	
+	.monwarning {
+	  position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+	}
+
+	/* Barre de transport (lecture des clips) */
+	.transport {
+	  display: flex;
+	  gap: 12px;
+	  margin-top: 22px;
+	  justify-content: center;
+	}
+	.tp-btn {
+	  font-size: 26px;
+	  padding: 12px 18px;
+	  min-width: 64px;
+	  border-radius: 8px;
+	  background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+	  color: white;
+	  border: none;
+	  box-shadow: inset 0 2px 2px rgba(255,255,255,0.05), 0 3px 6px rgba(0,0,0,0.6);
+	  cursor: pointer;
+	  transition: transform 0.1s;
+	}
+	.tp-btn:active { transform: scale(0.95); }
+	.tp-btn.active { outline: 3px solid yellow; box-shadow: 0 0 10px yellow; }
+	.tp-btn:disabled { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; outline: none; box-shadow: inset 0 2px 2px rgba(255,255,255,0.05), 0 3px 6px rgba(0,0,0,0.6); }
+	
+	
+  </style>
+</head>
+<body>
+  <button class="back-button" onclick="goBack()">← Accueil</button>
+
+  <div class="container">
+    <div class="panel">
+      <h2>Media Player 1</h2>
+      <select id="mp1Select">
+        <!-- Options injectées par JS -->
+      </select>
+      <div class="transport" id="mp1Transport"></div>
+    </div>
+
+    <div class="panel" id="mp2Panel">
+      <h2>Media Player 2</h2>
+      <select id="mp2Select">
+        <!-- Options injectées par JS -->
+      </select>
+      <div class="transport" id="mp2Transport"></div>
+    </div>
+  </div>
+
+<script>
+  // Construit les options : Clip 1/2 (sauf sur les ATEM Mini) puis images fixes 1 à 32
+  function buildMediaOptions(includeClips) {
+    const opts = [];
+    if (includeClips) {
+      for (let i = 1; i <= 2; i++) {
+        opts.push({ label: `Clip ${i}`, value: `clip${i}` });
+      }
+    }
+    for (let i = 1; i <= 32; i++) {
+      opts.push({ label: `Image fixe ${i}`, value: `still${i}` });
+    }
+    return opts;
+  }
+
+  function populateDropdown(selectId, options) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '';
+    options.forEach(opt => {
+      const o = document.createElement('option');
+      o.value = opt.value;
+      o.textContent = opt.label;
+      select.appendChild(o);
+    });
+  }
+
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  function sendToServer(mpId, slot) {
+    fetch(`/setMediaPlayer?id=${mpId}&slot=${slot}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log('✅ Réponse serveur:', data);
+        pollMpState(); // met à jour l'état (et active/grise le transport selon clip/still)
+      })
+      .catch(err => {
+        console.error('❌ Erreur appel serveur:', err);
+        alert("Erreur lors de la sélection du média !");
+      });
+  }
+
+  // Branche les événements de sélection
+  document.getElementById('mp1Select').addEventListener('change', (e) => sendToServer(3010, e.target.value));
+  document.getElementById('mp2Select').addEventListener('change', (e) => sendToServer(3020, e.target.value));
+
+  // ----- Transport (lecture des clips) -----
+  const TRANSPORT = [
+    { action: 'beginning', glyph: '⏮',  title: 'Début' },
+    { action: 'prev',      glyph: '⏪',  title: 'Image précédente' },
+    { action: 'playpause', glyph: '▶',  title: 'Lecture / Pause', key: 'Play' },
+    { action: 'next',      glyph: '⏩',  title: 'Image suivante' },
+    { action: 'loop',      glyph: '🔁', title: 'Boucle', key: 'Loop' }
+  ];
+
+  function buildTransport(containerId, mpId, prefix) {
+    const c = document.getElementById(containerId);
+    if (!c) return;
+    c.innerHTML = '';
+    TRANSPORT.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'tp-btn';
+      btn.textContent = b.glyph;
+      btn.title = b.title;
+      if (b.key) btn.id = prefix + b.key; // ex : mp1Play, mp1Loop
+      btn.addEventListener('click', () => mpTransport(mpId, b.action, prefix));
+      c.appendChild(btn);
+    });
+  }
+
+  async function mpTransport(mpId, action, prefix) {
+    try {
+      const res = await fetch(`/mpTransport?id=${mpId}&action=${action}`);
+      const d = await res.json();
+      updateTransportState(prefix, d);
+    } catch (e) {
+      console.error('❌ Erreur transport:', e);
+    }
+  }
+
+  function updateTransportState(prefix, st) {
+    const play = document.getElementById(prefix + 'Play');
+    const loop = document.getElementById(prefix + 'Loop');
+    if (play) {
+      play.textContent = st.playing ? '⏸' : '▶';
+      play.classList.toggle('active', !!st.playing);
+    }
+    if (loop) loop.classList.toggle('active', !!st.loop);
+  }
+
+  // Active/grise toute la barre de transport (transport utile uniquement sur un clip)
+  function setTransportEnabled(prefix, enabled) {
+    const c = document.getElementById(prefix + 'Transport');
+    if (!c) return;
+    c.querySelectorAll('.tp-btn').forEach(btn => { btn.disabled = !enabled; });
+  }
+
+  async function pollMpState() {
+    try {
+      const res = await fetch('/getMediaPlayersState');
+      const d = await res.json();
+      (d.mediaPlayers || []).forEach(mp => {
+        const prefix = mp.index === 0 ? 'mp1' : mp.index === 1 ? 'mp2' : null;
+        if (!prefix) return;
+        // Boutons actifs seulement si le media player est sur un clip
+        setTransportEnabled(prefix, mp.sourceType === 'Clip');
+        updateTransportState(prefix, mp);
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  // Initialisation : options, transport et affichage adaptés au modèle connecté
+  async function init() {
+    let caps = {};
+    try {
+      const res = await fetch('/atemCaps');
+      caps = await res.json();
+    } catch (e) { /* ATEM non joignable : valeurs par défaut */ }
+
+    // Clips + transport affichés SAUF sur les ATEM Mini (Pro/ISO/Extreme), qui ne gèrent que des images fixes
+    const includeClips = !caps.isMini;
+    const options = buildMediaOptions(includeClips);
+    populateDropdown('mp1Select', options);
+    populateDropdown('mp2Select', options);
+
+    if (includeClips) {
+      buildTransport('mp1Transport', 3010, 'mp1');
+      buildTransport('mp2Transport', 3020, 'mp2');
+      pollMpState();
+      setInterval(pollMpState, 600);
+    }
+
+    // Masque Media Player 2 si l'ATEM n'a qu'un seul lecteur (ex : ATEM Mini Pro)
+    if (typeof caps.mediaPlayers === 'number' && caps.mediaPlayers < 2) {
+      const p = document.getElementById('mp2Panel');
+      if (p) p.style.display = 'none';
+    }
+  }
+  init();
+</script>
+</body>
+</html>

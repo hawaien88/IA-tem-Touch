@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Interface Macros ATEM</title>
+  <style>
+body {
+  margin: 0;
+  background-color: #0d0d0d;
+  background-image: url("/images/background_global_iatem.png");
+  font-family: sans-serif;
+  color: #fff;
+  overflow: hidden;
+}
+
+.macro-container {
+  width: 1280px;
+  height: 800px;
+  padding: 100px 20px 20px;
+  box-sizing: border-box;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  white-space: nowrap;
+}
+
+.macro-container::-webkit-scrollbar {
+  display: none;                 /* Chrome, Safari */
+}
+
+.macro-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, 1fr); /* 3 lignes verticales */
+  gap: 16px;
+  width: max-content;
+  align-items: center;
+}
+
+
+.macro-card {
+  position: relative;
+  width: 280px;               /* ⬅️ Largeur doublée */
+  height: 140px;
+  background-color: #1f1f1f;
+  border: 2px solid #444;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;     /* ⬅️ Permet d'empiler le dot et le texte */
+  justify-content: center;
+  align-items: center;
+  padding: 10px;              /* ⬅️ Meilleure respiration interne */
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;         /* ⬅️ Centrer le texte */
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow-wrap: break-word;  /* ⬅️ Coupe les longs mots si besoin */
+  word-break: break-word;
+}
+
+/* Supprime l'effet hover inutile */
+.macro-card:hover {
+  border: none;
+  box-shadow: none;
+}
+
+/* 🔹 Effet de pulsation au clic (temporaire) */
+.macro-pulse {
+  border: 3px solid #00f;
+  box-shadow: 0 0 15px #00f;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%   { box-shadow: 0 0 8px #00f; }
+  50%  { box-shadow: 0 0 20px #00f; }
+  100% { box-shadow: 0 0 8px #00f; }
+}
+
+/* 🔴 Point rouge — invisible par défaut */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: none;
+}
+
+/* 🔴 Affichage pendant macro réelle + clignotement */
+.macro-active .status-dot {
+  display: block;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+.back-button {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #444;
+  border: none;
+  padding: 10px 16px;
+  color: white;
+  font-size: 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  transition: background 0.2s;
+}
+
+.back-button:hover {
+  background: #555;
+}
+
+.scroll-hint-bar {
+  pointer-events: none;
+  position: fixed;
+  top: 650px; /* ↕️ Ajustable à ton besoin visuel */
+  width: 100%;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  background-color: #1f1f1f; /* Identique à .macro-card */
+  color: white;
+  font-size: 20px;
+  padding: 12px 0;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+  border-top: 2px solid #333;
+  border-bottom: 2px solid #333;
+}
+
+.scroll-hint-bar .arrow {
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+}
+
+	
+  </style>
+</head>
+<body>
+  <button id="btnBack" class="back-button" onclick="goBack()">← Accueil</button>
+
+  <div class="scroll-hint-bar">
+    <span class="arrow">◄</span>
+    <span class="scroll-hint-text">Glisser pour parcourir plus de macros</span>
+    <span class="arrow">►</span>
+  </div>
+
+  <div class="macro-container">
+    <div class="macro-track" id="macroTrack">
+      <!-- Cartes insérées via JS -->
+    </div>
+  </div>
+  
+  <div class="macro" id="macro-${macro.id}">
+  <div class="status-dot"></div> <!-- Point rouge -->
+  <span>${macro.name}</span>
+</div>
+
+
+<script>
+const macroTrack = document.querySelector("#macroTrack");
+
+// Initialisation des boutons
+Promise.all([
+  fetch('/macrosList').then(res => res.json()),
+  fetch('/macrosRunStatus').then(res => res.json())
+])
+.then(([macros, runStatus]) => {
+  const activeId = runStatus.macroIndex;
+
+  macros.forEach(macro => {
+    const div = document.createElement("div");
+    div.className = "macro-card";
+    div.dataset.id = macro.id;
+
+    // Crée le point rouge (status-dot)
+    const dot = document.createElement("div");
+    dot.className = "status-dot";
+    div.appendChild(dot);
+
+    // Ajoute le nom de la macro
+    const span = document.createElement("span");
+    span.textContent = macro.name;
+    div.appendChild(span);
+
+    // Si déjà en cours → active visuellement
+    if (macro.id === activeId) {
+      div.classList.add("macro-active");
+    }
+
+    // Clic → effet visuel pendant 1.5s, mais sans interférer avec l’état réel
+    div.addEventListener("click", () => {
+      fetch(`/runMacro?id=${macro.id}`)
+        .then(res => res.json())
+        .then(() => {
+          div.classList.add("macro-pulse");
+
+          setTimeout(() => {
+            div.classList.remove("macro-pulse");
+          }, 1500);
+        })
+        .catch(err => console.error('❌ Erreur macro:', err));
+    });
+
+    macroTrack.appendChild(div);
+  });
+})
+.catch(err => console.error('❌ Chargement macros:', err));
+
+// Polling pour savoir quelle macro est en cours d'exécution
+setInterval(() => {
+  fetch('/macrosRunStatus')
+    .then(res => res.json())
+    .then(data => {
+      const activeId = data.macroIndex;
+
+      document.querySelectorAll('.macro-card').forEach(card => {
+        const macroId = parseInt(card.dataset.id, 10);
+
+        if (macroId === activeId) {
+          card.classList.add("macro-active");
+        } else {
+          card.classList.remove("macro-active");
+        }
+      });
+    })
+    .catch(err => console.error('❌ Polling macrosRunStatus:', err));
+}, 2000); // toutes les 2 secondes
+
+function goBack() {
+  window.location.href = "index.html"; // Change selon ta vraie page d'accueil
+}
+
+
+</script>
+
+
+
+
+</body>
+</html>

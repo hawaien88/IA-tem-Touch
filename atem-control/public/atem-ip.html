@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>IP ATEM</title>
+  <meta name="viewport" content="width=1280, height=800, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
+    }
+
+    body {
+      background-image: url("/images/background_global_iatem.png");
+    }
+
+    .back-button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: #444;
+      border: none;
+      padding: 10px 16px;
+      color: white;
+      font-size: 18px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 50px 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin: 0 0 10px 0;
+    }
+
+    #currentIP {
+      font-size: 22px;
+      color: #bbb;
+      margin-bottom: 30px;
+    }
+
+    .atem-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 720px;
+    }
+
+    .atem-option {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: linear-gradient(to bottom, #2e2e2e, #1a1a1a);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 18px 24px;
+      cursor: pointer;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.05),
+        0 4px 8px rgba(0,0,0,0.8);
+      transition: transform 0.1s, border-color 0.2s;
+    }
+
+    .atem-option:active {
+      transform: scale(0.99);
+    }
+
+    .atem-option.selected {
+      border-color: yellow;
+      box-shadow: 0 0 10px yellow;
+    }
+
+    .atem-option .radio {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 3px solid #777;
+      flex: 0 0 auto;
+    }
+
+    .atem-option.selected .radio {
+      border-color: yellow;
+      background: yellow;
+      box-shadow: 0 0 6px yellow;
+    }
+
+    .atem-option .label {
+      font-size: 26px;
+      text-align: left;
+    }
+
+    .atem-option .ip {
+      font-size: 18px;
+      color: #9a9a9a;
+      margin-top: 2px;
+    }
+
+    #customRow {
+      display: none;
+      align-items: center;
+      gap: 14px;
+      margin-top: 6px;
+      padding-left: 64px;
+    }
+
+    #customRow.visible {
+      display: flex;
+    }
+
+    #customIP {
+      font-size: 24px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: none;
+      background: #222;
+      color: white;
+      width: 360px;
+    }
+
+    .save-button {
+      margin-top: 35px;
+      font-size: 28px;
+      padding: 16px 50px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(to bottom, #2e7d32, #1b5e20);
+      color: white;
+      cursor: pointer;
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,0.08),
+        0 4px 8px rgba(0,0,0,0.8);
+    }
+
+    .save-button:active {
+      transform: scale(0.98);
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 22px;
+      min-height: 28px;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-button" onclick="goBack()">← Accueil</button>
+  <div class="container">
+    <h1>Réglages IP ATEM</h1>
+    <div id="currentIP">Chargement IP actuelle...</div>
+
+    <div class="atem-list" id="atemList">
+      <div class="atem-option" data-ip="192.168.12.102">
+        <div class="radio"></div>
+        <div>
+          <div class="label">Atem Mini Pro</div>
+          <div class="ip">192.168.12.102</div>
+        </div>
+      </div>
+      <div class="atem-option" data-ip="192.168.12.104">
+        <div class="radio"></div>
+        <div>
+          <div class="label">Atem Mini Extrême ISO</div>
+          <div class="ip">192.168.12.104</div>
+        </div>
+      </div>
+      <div class="atem-option" data-ip="192.168.12.101">
+        <div class="radio"></div>
+        <div>
+          <div class="label">Atem Production Switcher HD</div>
+          <div class="ip">192.168.12.101</div>
+        </div>
+      </div>
+      <div class="atem-option" data-ip="custom">
+        <div class="radio"></div>
+        <div>
+          <div class="label">Autre</div>
+          <div class="ip">Adresse personnalisée</div>
+        </div>
+      </div>
+      <div id="customRow">
+        <input id="customIP" type="text" placeholder="ex : 192.168.12.110">
+      </div>
+    </div>
+
+    <button class="save-button" onclick="saveIP()">Enregistrer</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    // Adresses connues (pour pré-sélectionner l'option correspondant à l'IP actuelle)
+    const KNOWN_IPS = ["192.168.12.101", "192.168.12.104", "192.168.12.102"];
+    let selectedValue = null; // "192.168.12.x" ou "custom"
+
+    const options    = document.querySelectorAll('.atem-option');
+    const customRow  = document.getElementById('customRow');
+    const customIP   = document.getElementById('customIP');
+    const messageEl  = document.getElementById('message');
+
+    function selectOption(value) {
+      selectedValue = value;
+      options.forEach(opt => {
+        opt.classList.toggle('selected', opt.dataset.ip === value);
+      });
+      customRow.classList.toggle('visible', value === 'custom');
+      if (value === 'custom') customIP.focus();
+    }
+
+    options.forEach(opt => {
+      opt.addEventListener('click', () => selectOption(opt.dataset.ip));
+    });
+
+    async function fetchCurrentIP() {
+      try {
+        const res = await fetch('/currentIP');
+        const data = await res.json();
+        const ip = data.atemIP;
+        document.getElementById('currentIP').innerText = `IP actuelle : ${ip}`;
+        // Pré-sélection
+        if (KNOWN_IPS.includes(ip)) {
+          selectOption(ip);
+        } else if (ip) {
+          selectOption('custom');
+          customIP.value = ip;
+        }
+      } catch (err) {
+        document.getElementById('currentIP').innerText = "❌ Impossible de récupérer l'IP actuelle";
+      }
+    }
+
+    function resolveIP() {
+      if (selectedValue === 'custom') return customIP.value.trim();
+      return selectedValue;
+    }
+
+    async function saveIP() {
+      const ip = resolveIP();
+      if (!ip) {
+        messageEl.style.color = '#ff6b6b';
+        messageEl.innerText = "⚠️ Sélectionne un ATEM ou saisis une adresse.";
+        return;
+      }
+
+      messageEl.style.color = '#ddd';
+      messageEl.innerText = "⏳ Connexion à l'ATEM en cours...";
+
+      try {
+        const res = await fetch('/setIP', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          messageEl.style.color = '#7CFC00';
+          messageEl.innerText = `✅ IP enregistrée (${ip}). Reconnexion en cours...`;
+          fetchCurrentIP();
+        } else {
+          messageEl.style.color = '#ff6b6b';
+          messageEl.innerText = `❌ ${data.error || "Échec de l'enregistrement"}`;
+        }
+      } catch (err) {
+        messageEl.style.color = '#ff6b6b';
+        messageEl.innerText = "❌ Erreur lors de l'enregistrement de l'IP";
+      }
+    }
+
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    fetchCurrentIP();
+  </script>
+</body>
+</html>
