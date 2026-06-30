@@ -10,6 +10,9 @@ over the IP network.
 The goal: turn a mini-PC + touchscreen into a **dedicated production panel** that
 boots straight into fullscreen.
 
+<img width="1920" height="1080" alt="power_on" src="https://github.com/user-attachments/assets/61d4bd5f-de5b-4fd5-8d2f-6872e38d6de6" />
+
+Another repository is available <a href="https://github.com/hawaien88/IA-Tem/" title="IA-tem">here</a> for creating the physical control panel for preview, program, macro, cut, and auto functions.
 ---
 
 ## ⚡ Quick start
