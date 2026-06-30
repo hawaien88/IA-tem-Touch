@@ -10,6 +10,10 @@ le mélangeur via le réseau IP.
 L'objectif : transformer un mini-PC + écran tactile en **pupitre de régie dédié**,
 qui démarre tout seul en plein écran.
 
+<img width="1920" height="1080" alt="power_on" src="https://github.com/user-attachments/assets/3b90a195-ddfd-4ea5-afba-febe435226f5" />
+
+Un autre repo est disponible pour la création du Panel de pilotage des preview/program/macro/cut/auto physique <a href="https://github.com/hawaien88/IA-Tem/" title="IA-tem">ici</a>
+
 ---
 
 ## ⚡ Démarrage rapide
