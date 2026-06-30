@@ -119,12 +119,46 @@ const rpiIP = ""; // e.g. "192.168.12.103" — leave empty if you have no Raspbe
 
 ## 🚀 Installation
 
+### 1. Install Node.js (which includes npm)
+
+`npm` ships **with Node.js**: there is nothing separate to install.
+
+- **Easiest**: download the **LTS** installer from <https://nodejs.org/> and run it
+  (keep the default options).
+- **From the command line** (Windows 10/11):
+
+  ```powershell
+  winget install OpenJS.NodeJS.LTS
+  ```
+
+Then verify, in a **new** terminal:
+
 ```bash
-# 1. Get the project
+node -v
+npm -v
+```
+
+### 2. Get the project
+
+**Option A — with Git:**
+
+```bash
 git clone <repository-url> IAtem-control
 cd IAtem-control
+```
 
-# 2. Install dependencies
+**Option B — download the ZIP (no Git):**
+
+1. On the project's GitHub page: green **`Code`** button ▸ **`Download ZIP`**.
+2. Extract the archive (right-click ▸ *Extract All…*).
+3. Open a terminal **in the extracted folder**: in File Explorer, click the address
+   bar, type `powershell`, then press Enter.
+
+### 3. Install dependencies
+
+In the project folder:
+
+```bash
 npm install
 ```
 

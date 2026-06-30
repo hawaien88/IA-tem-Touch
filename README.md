@@ -121,12 +121,46 @@ const rpiIP = ""; // ex. "192.168.12.103" — laisser vide si pas de Raspberry P
 
 ## 🚀 Installation
 
+### 1. Installer Node.js (qui inclut npm)
+
+`npm` est fourni **avec Node.js** : il n'y a rien à installer séparément.
+
+- **Le plus simple** : télécharger l'installeur **LTS** sur <https://nodejs.org/> et
+  l'exécuter (laisser les options par défaut).
+- **En ligne de commande** (Windows 10/11) :
+
+  ```powershell
+  winget install OpenJS.NodeJS.LTS
+  ```
+
+Vérifier ensuite, dans un **nouveau** terminal :
+
 ```bash
-# 1. Récupérer le projet
+node -v
+npm -v
+```
+
+### 2. Récupérer le projet
+
+**Option A — avec Git :**
+
+```bash
 git clone <url-du-depot> IAtem-control
 cd IAtem-control
+```
 
-# 2. Installer les dépendances
+**Option B — téléchargement du ZIP (sans Git) :**
+
+1. Sur la page GitHub du projet : bouton vert **`Code`** ▸ **`Download ZIP`**.
+2. Extraire l'archive (clic droit ▸ *Extraire tout…*).
+3. Ouvrir un terminal **dans le dossier extrait** : dans l'Explorateur, clique dans la
+   barre d'adresse, tape `powershell` puis Entrée.
+
+### 3. Installer les dépendances
+
+Dans le dossier du projet :
+
+```bash
 npm install
 ```
 
