@@ -1,0 +1,27 @@
+# === Dépendances Node.js ===
+# Réinstallées via `npm install` à partir de package.json / package-lock.json
+node_modules/
+
+# === Logs & rapports ===
+*.log
+npm-debug.log*
+logs/
+
+# === Variables d'environnement / secrets éventuels ===
+.env
+.env.local
+
+# === Fichiers système Windows / macOS ===
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# === Éditeurs / IDE ===
+.vscode/
+.idea/
+*.code-workspace
+
+# === Outils internes (non nécessaires au dépôt) ===
+.claude/
