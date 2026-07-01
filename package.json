@@ -1,5 +1,5 @@
 {
-  "name": "atem-panel",
+  "name": "ia-tem-touch",
   "version": "1.0.0",
   "main": "atem-control/server.js",
   "scripts": {
