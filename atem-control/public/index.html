@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>ATEM Touch Panel</title>
   <meta name="viewport" content="width=1280, height=800, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -251,7 +252,7 @@
     <a class="menu-button" href="mix.html">Mix</a>
 	<!-- Bouton Réglages divisé -->
     <div class="settings-container">
-      <div class="settings-top">Réglages DIP MIX WIPE<button id="fsToggle" class="fs-toggle" title="Plein écran / Fenêtré" onclick="toggleFullscreen()">⛶</button></div>
+      <div class="settings-top"><span data-i18n="settings_dmw">Réglages DIP MIX WIPE</span><button id="fsToggle" class="fs-toggle" title="Plein écran / Fenêtré" data-i18n-title="fs_toggle_title" onclick="toggleFullscreen()">⛶</button></div>
       <div class="settings-bottom">
         <button id="btnME1" class="transition-button">ME1</button>
         <button id="btnME2" class="transition-button">ME2</button>
@@ -263,7 +264,7 @@
 	<a class="menu-button" href="mediaplayer.html">Media Player</a>
 	<a class="menu-button" id="btnSupersource" href="supersource.html">SuperSource</a>
     <a class="menu-button" href="auxatem.html">AUX</a>
-	<a class="menu-button" href="atem-ip.html">IP ATEM</a>
+	<a class="menu-button" href="atem-ip.html" data-i18n="menu_ip">IP ATEM</a>
     <!-- Tuile vide pour centrer Transition -->
     <div class="menu-empty"></div>
     <!-- Bouton Transition divisé -->
@@ -282,10 +283,17 @@
   </div>
 
   <script>
-    // Bascule plein écran <-> fenêtré (API Fullscreen standard du navigateur).
-    // En mode fenêtré, Chrome (lancé en --app) affiche sa barre de fenêtre
-    // avec les boutons minimiser / fermer, pour pouvoir quitter si besoin.
-    function toggleFullscreen() {
+    // Bascule plein écran <-> fenêtré.
+    // Sous Windows (écran tactile sans clavier) : on demande au serveur d'envoyer une
+    // vraie touche F11 à Chrome. Cela quitte le plein écran "navigateur" (que JavaScript
+    // ne peut pas quitter seul) et fait réapparaître la barre de titre + la barre des tâches.
+    // Repli (autres OS / route absente) : API Fullscreen standard du navigateur.
+    async function toggleFullscreen() {
+      try {
+        const r = await fetch('/toggle-fullscreen');
+        if (r.ok) return; // Windows : Chrome a basculé via F11
+      } catch (e) { /* serveur injoignable : on tente le repli */ }
+
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       } else {
@@ -293,7 +301,7 @@
       }
     }
 
-    // Met à jour l'icône du bouton selon l'état réel du plein écran
+    // Met à jour l'icône du bouton quand on utilise le repli (API Fullscreen standard)
     document.addEventListener('fullscreenchange', () => {
       const b = document.getElementById('fsToggle');
       if (b) b.textContent = document.fullscreenElement ? '🗗' : '⛶';
@@ -346,7 +354,7 @@
 async function pollTransitionState() {
   if (!atemOnline) {
     const transitionTop = document.querySelector('.transition-container .transition-top');
-    if (transitionTop) transitionTop.textContent = 'ATEM non connecté';
+    if (transitionTop) transitionTop.textContent = t('atem_offline');
     dots.forEach(dot => dot.classList.remove('active'));
     document.querySelectorAll('.transition-btn').forEach(btn => {
       btn.classList.remove('active-transition', 'blink-transition');
@@ -356,7 +364,7 @@ async function pollTransitionState() {
 
   if (currentActiveME === null || currentActiveME === undefined || currentActiveME === '') {
     const transitionTop = document.querySelector('.transition-container .transition-top');
-    if (transitionTop) transitionTop.textContent = 'En attente de mise à jour…';
+    if (transitionTop) transitionTop.textContent = t('waiting_update');
     dots.forEach(dot => dot.classList.remove('active'));
     document.querySelectorAll('.transition-btn').forEach(btn => {
       btn.classList.remove('active-transition', 'blink-transition');
@@ -388,7 +396,7 @@ async function pollTransitionState() {
 
     const transitionTop = document.querySelector('.transition-container .transition-top');
     if (transitionTop) {
-      transitionTop.textContent = state.inTransition ? 'Transition en cours…' : 'Transition';
+      transitionTop.textContent = state.inTransition ? t('transition_running') : t('transition');
     }
 
     const progress = state.position ?? 0;
@@ -447,7 +455,9 @@ const rpiIP = ""; // ex. "192.168.12.103"
   const btn = document.getElementById('btnConfigRpi');
   if (!btn) return;
   if (rpiIP && rpiIP.trim() !== '') {
-    btn.href = `http://${rpiIP}:3000/config.html`;
+    // Transmet la langue courante à la page RPi (origines différentes → via l'URL)
+    const lang = (window.i18n && window.i18n.getLang) ? window.i18n.getLang() : 'fr';
+    btn.href = `http://${rpiIP}:3000/config.html?lang=${lang}`;
   } else {
     btn.classList.add('disabled');
     btn.removeAttribute('href');

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Dip Transition</title>
   <meta name="viewport" content="width=1280, height=800, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -207,7 +208,7 @@
 
   <!-- Bandeau haut -->
   <div class="top-bar">
-    <button class="back-button" onclick="goBack()">← Accueil</button>
+    <button class="back-button" onclick="goBack()" data-i18n="back">← Accueil</button>
 
     <div class="transition-buttons">
       <button class="transition-button">MIX</button>
@@ -227,9 +228,9 @@
   </div>
 
   <div class="container">
-    <h1>Réglages DIP</h1>
+    <h1 data-i18n="dip_title">Réglages DIP</h1>
 
-    <div class="dip-rate" id="dipRate">Chargement…</div>
+    <div class="dip-rate" id="dipRate" data-i18n="loading2">Chargement…</div>
 
     <div class="slider">
       <input type="range" id="rateSlider" min="1" max="250" oninput="onSliderChange(this.value)" />
@@ -241,9 +242,9 @@
     </div>
 
     <div class="source-select">
-      <label for="sourceSelect">Source :</label>
+      <label for="sourceSelect" data-i18n="source_label">Source :</label>
       <select id="sourceSelect" onchange="changeSource(this.value)">
-        <option value="">Chargement…</option>
+        <option value="" data-i18n="loading2">Chargement…</option>
       </select>
     </div>
   </div>
@@ -284,7 +285,7 @@
     }
 
     function updateUI(rate, input) {
-      dipRateDisplay.innerText = `Durée dip : ${formatAtemExact(rate)}`;
+      dipRateDisplay.innerText = t('dip_duration', { v: formatAtemExact(rate) });
       rateSlider.value = rate;
       if ([...sourceSelect.options].some(o => o.value === input.toString())) {
         sourceSelect.value = input;
@@ -297,7 +298,7 @@
       const list = await fetchInputsList();
       sourceSelect.innerHTML = '';
       if (list.length === 0) {
-        sourceSelect.innerHTML = '<option value="">Aucune source disponible</option>';
+        sourceSelect.innerHTML = `<option value="">${t('no_source')}</option>`;
       } else {
         list.forEach(src => {
           const option = document.createElement('option');

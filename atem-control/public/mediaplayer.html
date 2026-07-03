@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Média Players</title>
   <meta name="viewport" content="width=1280, height=800, initial-scale=1.0">
+  <script src="/js/i18n.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -116,7 +117,7 @@
   </style>
 </head>
 <body>
-  <button class="back-button" onclick="goBack()">← Accueil</button>
+  <button class="back-button" onclick="goBack()" data-i18n="back">← Accueil</button>
 
   <div class="container">
     <div class="panel">
@@ -146,7 +147,7 @@
       }
     }
     for (let i = 1; i <= 32; i++) {
-      opts.push({ label: `Image fixe ${i}`, value: `still${i}` });
+      opts.push({ label: t('mp_still', { i: i }), value: `still${i}` });
     }
     return opts;
   }
@@ -175,7 +176,7 @@
       })
       .catch(err => {
         console.error('❌ Erreur appel serveur:', err);
-        alert("Erreur lors de la sélection du média !");
+        alert(t('mp_error'));
       });
   }
 
@@ -185,11 +186,11 @@
 
   // ----- Transport (lecture des clips) -----
   const TRANSPORT = [
-    { action: 'beginning', glyph: '⏮',  title: 'Début' },
-    { action: 'prev',      glyph: '⏪',  title: 'Image précédente' },
-    { action: 'playpause', glyph: '▶',  title: 'Lecture / Pause', key: 'Play' },
-    { action: 'next',      glyph: '⏩',  title: 'Image suivante' },
-    { action: 'loop',      glyph: '🔁', title: 'Boucle', key: 'Loop' }
+    { action: 'beginning', glyph: '⏮',  title: t('mp_beginning') },
+    { action: 'prev',      glyph: '⏪',  title: t('mp_prev') },
+    { action: 'playpause', glyph: '▶',  title: t('mp_playpause'), key: 'Play' },
+    { action: 'next',      glyph: '⏩',  title: t('mp_next') },
+    { action: 'loop',      glyph: '🔁', title: t('mp_loop'), key: 'Loop' }
   ];
 
   function buildTransport(containerId, mpId, prefix) {

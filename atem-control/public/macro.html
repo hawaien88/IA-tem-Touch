@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Interface Macros ATEM</title>
+  <script src="/js/i18n.js"></script>
   <style>
 body {
   margin: 0;
@@ -148,11 +149,11 @@ body {
   </style>
 </head>
 <body>
-  <button id="btnBack" class="back-button" onclick="goBack()">← Accueil</button>
+  <button id="btnBack" class="back-button" onclick="goBack()" data-i18n="back">← Accueil</button>
 
   <div class="scroll-hint-bar">
     <span class="arrow">◄</span>
-    <span class="scroll-hint-text">Glisser pour parcourir plus de macros</span>
+    <span class="scroll-hint-text" data-i18n="macro_hint">Glisser pour parcourir plus de macros</span>
     <span class="arrow">►</span>
   </div>
 

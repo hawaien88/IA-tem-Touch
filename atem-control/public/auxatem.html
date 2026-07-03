@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Configuration AUX</title>
   <meta name="viewport" content="width=1280, height=800">
+  <script src="/js/i18n.js"></script>
   <style>
     body {
       margin: 0;
@@ -80,7 +81,7 @@
 </head>
 <body>
 
-  <button class="back-button" onclick="goBack()">← Accueil</button>
+  <button class="back-button" onclick="goBack()" data-i18n="back">← Accueil</button>
 
   <div class="grid" id="auxGrid">
     <!-- Blocs AUX seront générés par JS -->
@@ -115,8 +116,8 @@
     function auxLabel(info, i) {
       if (info.outputs && info.outputs[i] && info.outputs[i].label) return info.outputs[i].label;
       if (info.isMini) {
-        if (info.count <= 1) return "Sortie HDMI / Webcam";
-        return i === 0 ? "Sortie HDMI" : "Sortie USB (Webcam)";
+        if (info.count <= 1) return t('aux_hdmi_webcam');
+        return i === 0 ? t('aux_hdmi') : t('aux_usb');
       }
       return `AUX ${i + 1}`;
     }
@@ -132,7 +133,7 @@
         auxGrid.style.display = "block";
         auxGrid.innerHTML =
           `<div style="text-align:center;font-size:26px;color:#ccc">` +
-          (info.connected ? "Ce modèle ne dispose d'aucune sortie AUX." : "ATEM non connecté.") +
+          (info.connected ? t('aux_none') : t('aux_offline')) +
           `</div>`;
         return;
       }

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Réglages Wipe</title>
   <meta name="viewport" content="width=1280, height=800">
+  <script src="/js/i18n.js"></script>
   <style>
     body {
   margin: 0;
@@ -296,7 +297,7 @@
 </head>
 <body>
   <div class="top-bar">
-  <button class="back-button" onclick="window.location.href='index.html'">← Accueil</button>
+  <button class="back-button" onclick="window.location.href='index.html'" data-i18n="back">← Accueil</button>
 
   <div class="transition-buttons">
     <button class="transition-button">MIX</button>
@@ -315,7 +316,7 @@
   </div>
 </div>
 
-<h1>Réglages Wipe</h1>
+<h1 data-i18n="wipe_title">Réglages Wipe</h1>
 
 
   <div class="grid-container" id="shapeGrid"></div>
@@ -325,90 +326,90 @@
 <div class="group-wrapper">
   <!-- Durée -->
   <div class="control-group duration">
-    <h3>Durée</h3>
+    <h3 data-i18n="wipe_duration_h">Durée</h3>
     <div class="slider-container">
       <button onclick="adjust('duration', -0.02)">–</button>
       <input type="range" min="0.01" max="500" step="0.01" id="durationSlider" oninput="updateDisplay('duration') ; sendToAtem('duration', this.value);">
       <button onclick="adjust('duration', 0.02)">+</button>
     </div>
-    <div class="value-display" id="durationDisplay">Durée : 00:01</div>
+    <div class="value-display" id="durationDisplay" data-i18n="wipe_duration_init">Durée : 00:01</div>
   </div>
 </div>
   <!-- Bloc symétrie + positions -->
   <div class="group-wrapper">
     <div class="control-group symmetry">
-      <h3>Symétrie</h3>
+      <h3 data-i18n="wipe_symmetry_h">Symétrie</h3>
       <div class="slider-container">
         <button onclick="adjust('symmetry', -10)">–</button>
         <input type="range" id="symmetrySlider" min="0" max="10000" step="10" oninput="updateDisplay('symmetry'); sendToAtem('symmetry', this.value);">
         <button onclick="adjust('symmetry', 10)">+</button>
       </div>
-      <div class="value-display" id="symmetryDisplay">Symétrie : 0%</div>
+      <div class="value-display" id="symmetryDisplay" data-i18n="wipe_symmetry_init">Symétrie : 0%</div>
     </div>
 
     <div class="pos-group">
       <div class="control-group posX">
-        <h3>Position X</h3>
+        <h3 data-i18n="wipe_posx_h">Position X</h3>
         <div class="slider-container">
           <button onclick="adjust('posX', -10)">–</button>
           <input type="range" id="posXSlider" min="0" max="10000" step="10" oninput="updateDisplay('posX'); sendToAtem('posX', this.value);">
 		  <button onclick="adjust('posX', 10)">+</button>
         </div>
-        <div class="value-display" id="posXDisplay">X : 0.0000</div>
+        <div class="value-display" id="posXDisplay" data-i18n="wipe_posx_init">X : 0.0000</div>
       </div>
 
       <div class="control-group posY">
-        <h3>Position Y</h3>
+        <h3 data-i18n="wipe_posy_h">Position Y</h3>
         <div class="slider-container">
           <button onclick="adjust('posY', -10)">–</button>
           <input type="range" id="posYSlider" min="0" max="10000" step="10" oninput="updateDisplay('posY'); sendToAtem('posY', this.value);">
           <button onclick="adjust('posY', 10)">+</button>
         </div>
-        <div class="value-display" id="posYDisplay">Y : 0.0000</div>
+        <div class="value-display" id="posYDisplay" data-i18n="wipe_posy_init">Y : 0.0000</div>
       </div>
     </div>
   </div>
 <div class="group-wrapper">
   <!-- Direction -->
 <div class="control-group direction direction-group">
-  <h3>Direction</h3>
+  <h3 data-i18n="wipe_direction_h">Direction</h3>
   <div class="btn-group">
-    <button id="playBtn">▶ Play</button>
-    <button id="reverseBtn">◀ Retour</button>
+    <button id="playBtn" data-i18n="wipe_play">▶ Play</button>
+    <button id="reverseBtn" data-i18n="wipe_reverse">◀ Retour</button>
   </div>
   <label for="inverseCheckbox">
-    <input type="checkbox" id="inverseCheckbox"> Inverser
+    <input type="checkbox" id="inverseCheckbox"> <span data-i18n="wipe_invert">Inverser</span>
   </label>
 </div>
  </div>
 
   <!-- Bloc bordure -->
   <div class="group-wrapper labeled-border">
-    <h3 class="group-title">Bordure</h3>
+    <h3 class="group-title" data-i18n="wipe_border_h">Bordure</h3>
     <div class="adoucissement-largeur">
       <div class="control-group softness">
-        <h3>Adoucissement</h3>
+        <h3 data-i18n="wipe_softness_h">Adoucissement</h3>
         <div class="slider-container">
           <button onclick="adjust('softness', -10)">–</button>
           <input type="range" id="softnessSlider" min="0" max="10000" step="0.1" oninput="updateDisplay('softness'); sendToAtem('softness', this.value); ">
           <button onclick="adjust('softness', 10)">+</button>
         </div>
-        <div class="value-display" id="softnessDisplay">Adoucissement : 0%</div>
+        <div class="value-display" id="softnessDisplay" data-i18n="wipe_softness_init">Adoucissement : 0%</div>
       </div>
 
       <div class="control-group width">
-        <h3>Largeur</h3>
+        <h3 data-i18n="wipe_width_h">Largeur</h3>
         <div class="slider-container">
           <button onclick="adjust('width', -10)">–</button>
           <input type="range" id="widthSlider" min="0" max="10000" step="0.1" oninput="updateDisplay('width'); sendToAtem('width', this.value); ">
           <button onclick="adjust('width', 10)">+</button>
         </div>
-        <div class="value-display" id="widthDisplay">Largeur : 0%</div>
+        <div class="value-display" id="widthDisplay" data-i18n="wipe_width_init">Largeur : 0%</div>
       </div>
     </div>
 
     <div class="control-group fill">
-      <h3>Remplissage</h3>
+      <h3 data-i18n="wipe_fill_h">Remplissage</h3>
       <select id="fillSelect" onchange="setFill(this)"></select>
     </div>
   </div>
@@ -479,16 +480,16 @@
     const v = parseFloat(document.getElementById(type + 'Slider').value);
     const d = document.getElementById(type + 'Display');
     switch(type) {
-      case 'symmetry': d.textContent = `Symétrie : ${(v/100).toFixed(1)}%`; break;
-      case 'softness': d.textContent = `Adoucissement : ${(v/100).toFixed(1)}%`; break;
-      case 'width':    d.textContent = `Largeur : ${(v/100).toFixed(1)}%`; break;
-      case 'posX':     d.textContent = `X : ${(v / 10000).toFixed(4)}`; break;
-      case 'posY':     d.textContent = `Y : ${(v / 10000).toFixed(4)}`; break;
+      case 'symmetry': d.textContent = t('wipe_symmetry', { v: (v/100).toFixed(1) }); break;
+      case 'softness': d.textContent = t('wipe_softness', { v: (v/100).toFixed(1) }); break;
+      case 'width':    d.textContent = t('wipe_width', { v: (v/100).toFixed(1) }); break;
+      case 'posX':     d.textContent = t('wipe_posx', { v: (v / 10000).toFixed(4) }); break;
+      case 'posY':     d.textContent = t('wipe_posy', { v: (v / 10000).toFixed(4) }); break;
       case 'duration':
         const totalFrames = Math.round(v * 2 * FPS);
         const seconds = Math.floor(totalFrames / FPS);
         const halfFrames = Math.round((totalFrames % FPS) / 2);
-        d.textContent = `Durée : ${seconds}:${halfFrames.toString().padStart(2, '0')}`;
+        d.textContent = t('wipe_duration', { v: `${seconds}:${halfFrames.toString().padStart(2, '0')}` });
         break;
     }
   }

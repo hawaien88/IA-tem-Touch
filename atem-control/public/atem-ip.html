@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>IP ATEM</title>
   <meta name="viewport" content="width=1280, height=800, initial-scale=1.0">
+  <script src="/js/i18n.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -156,10 +157,10 @@
   </style>
 </head>
 <body>
-  <button class="back-button" onclick="goBack()">← Accueil</button>
+  <button class="back-button" onclick="goBack()" data-i18n="back">← Accueil</button>
   <div class="container">
-    <h1>Réglages IP ATEM</h1>
-    <div id="currentIP">Chargement IP actuelle...</div>
+    <h1 data-i18n="ip_title">Réglages IP ATEM</h1>
+    <div id="currentIP" data-i18n="ip_loading">Chargement IP actuelle...</div>
 
     <div class="atem-list" id="atemList">
       <div class="atem-option" data-ip="192.168.12.102">
@@ -186,16 +187,16 @@
       <div class="atem-option" data-ip="custom">
         <div class="radio"></div>
         <div>
-          <div class="label">Autre</div>
-          <div class="ip">Adresse personnalisée</div>
+          <div class="label" data-i18n="ip_other">Autre</div>
+          <div class="ip" data-i18n="ip_custom">Adresse personnalisée</div>
         </div>
       </div>
       <div id="customRow">
-        <input id="customIP" type="text" placeholder="ex : 192.168.12.110">
+        <input id="customIP" type="text" placeholder="ex : 192.168.12.110" data-i18n-placeholder="ip_placeholder">
       </div>
     </div>
 
-    <button class="save-button" onclick="saveIP()">Enregistrer</button>
+    <button class="save-button" onclick="saveIP()" data-i18n="ip_save">Enregistrer</button>
     <div id="message"></div>
   </div>
 
@@ -227,7 +228,7 @@
         const res = await fetch('/currentIP');
         const data = await res.json();
         const ip = data.atemIP;
-        document.getElementById('currentIP').innerText = `IP actuelle : ${ip}`;
+        document.getElementById('currentIP').innerText = t('ip_current', { ip: ip });
         // Pré-sélection
         if (KNOWN_IPS.includes(ip)) {
           selectOption(ip);
@@ -236,7 +237,7 @@
           customIP.value = ip;
         }
       } catch (err) {
-        document.getElementById('currentIP').innerText = "❌ Impossible de récupérer l'IP actuelle";
+        document.getElementById('currentIP').innerText = t('ip_fetch_error');
       }
     }
 
@@ -249,12 +250,12 @@
       const ip = resolveIP();
       if (!ip) {
         messageEl.style.color = '#ff6b6b';
-        messageEl.innerText = "⚠️ Sélectionne un ATEM ou saisis une adresse.";
+        messageEl.innerText = t('ip_select_warn');
         return;
       }
 
       messageEl.style.color = '#ddd';
-      messageEl.innerText = "⏳ Connexion à l'ATEM en cours...";
+      messageEl.innerText = t('ip_connecting');
 
       try {
         const res = await fetch('/setIP', {
@@ -265,15 +266,15 @@
         const data = await res.json();
         if (res.ok) {
           messageEl.style.color = '#7CFC00';
-          messageEl.innerText = `✅ IP enregistrée (${ip}). Reconnexion en cours...`;
+          messageEl.innerText = t('ip_saved', { ip: ip });
           fetchCurrentIP();
         } else {
           messageEl.style.color = '#ff6b6b';
-          messageEl.innerText = `❌ ${data.error || "Échec de l'enregistrement"}`;
+          messageEl.innerText = `❌ ${data.error || t('ip_save_failed')}`;
         }
       } catch (err) {
         messageEl.style.color = '#ff6b6b';
-        messageEl.innerText = "❌ Erreur lors de l'enregistrement de l'IP";
+        messageEl.innerText = t('ip_save_error');
       }
     }
 

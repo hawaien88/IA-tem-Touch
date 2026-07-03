@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Mix</title>
   <meta name="viewport" content="width=1280, height=800, initial-scale=1.0" />
+  <script src="/js/i18n.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -192,7 +193,7 @@
 <body>
   <!-- Bandeau supérieur -->
   <div class="top-bar">
-    <button class="back-button" onclick="goBack()">← Accueil</button>
+    <button class="back-button" onclick="goBack()" data-i18n="back">← Accueil</button>
 
     <div class="transition-buttons">
       <button class="transition-button">MIX</button>
@@ -213,8 +214,8 @@
 
   <!-- Contenu principal -->
   <div class="container">
-    <h1>Réglage Mix</h1>
-    <div class="transition-time" id="transitionTime">Chargement...</div>
+    <h1 data-i18n="mix_title">Réglage Mix</h1>
+    <div class="transition-time" id="transitionTime" data-i18n="loading">Chargement...</div>
 
     <div class="slider">
       <input type="range" min="1" max="250" id="slider" oninput="sliderChange(this.value)">
@@ -263,7 +264,7 @@
   async function updateDisplay() {
     const frames = await fetchCurrentDuration();
     const atemDisplay = formatAtemExact(frames);
-    document.getElementById('transitionTime').innerText = `Durée : ${atemDisplay}`;
+    document.getElementById('transitionTime').innerText = t('mix_duration', { v: atemDisplay });
     document.getElementById('slider').value = frames;
   }
 
